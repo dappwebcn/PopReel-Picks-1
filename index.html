@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>马来西亚流行影视应用</title>
+    <style>
+        /* 基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background-color: #121212;
+            color: #fff;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #333;
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        
+        /* 内容网格布局 */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-gap: 20px;
+            margin-top: 20px;
+        }
+        
+        /* 内容卡片样式 */
+        .content-card {
+            background-color: #1f1f1f;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .content-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+        
+        .card-info {
+            padding: 15px;
+        }
+        
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .card-desc {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .tag {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            background-color: #333;
+        }
+        
+        .tag.type {
+            background-color: #e50914;
+        }
+        
+        .tag.country {
+            background-color: #0077c8;
+        }
+        
+        /* 详情页样式 */
+        .detail-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        
+        .detail-content {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #1f1f1f;
+            border-radius: 10px;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .detail-poster {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .detail-info h2 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .detail-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .detail-desc {
+            margin-bottom: 20px;
+            line-height: 1.7;
+        }
+        
+        .detail-cast {
+            margin-bottom: 20px;
+        }
+        
+        .detail-cast h3, .detail-gallery h3 {
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .detail-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .gallery-img {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-like {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .btn-dislike {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        /* 打赏弹窗 */
+        .tip-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .tip-box {
+            background-color: #fff;
+            color: #333;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .tip-title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+        }
+        
+        .tip-input {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+        
+        .tip-buttons {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        
+        .tip-btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        
+        .tip-btn-cancel {
+            background-color: #ddd;
+        }
+        
+        .tip-btn-confirm {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .detail-content {
+                margin: 10px;
+                padding: 15px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .card-img {
+                height: 220px;
+            }
+            
+            .detail-gallery {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>马来西亚流行影视</h1>
+            <p>探索马来西亚及世界各地的优质影视内容</p>
+        </header>
+        
+        <div class="content-grid" id="content-grid">
+            <!-- 内容项将通过JavaScript动态生成 -->
+        </div>
+    </div>
+    
+    <!-- 详情页模板 -->
+    <div class="detail-container" id="detail-container">
+        <div class="detail-content">
+            <button class="close-btn" id="close-detail">&times;</button>
+            <img src="" alt="" class="detail-poster" id="detail-poster">
+            
+            <div class="detail-info">
+                <h2 id="detail-title"></h2>
+                <div class="detail-meta" id="detail-meta"></div>
+                
+                <div class="detail-desc">
+                    <p id="detail-desc"></p>
+                </div>
+                
+                <div class="detail-cast">
+                    <h3>演员阵容</h3>
+                    <p id="detail-cast"></p>
+                </div>
+                
+                <div class="detail-gallery" id="detail-gallery">
+                    <!-- 剧照将通过JavaScript动态生成 -->
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-like" id="btn-like">好评</button>
+                <button class="btn btn-dislike" id="btn-dislike">差评</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 打赏弹窗 -->
+    <div class="tip-container" id="tip-container">
+        <div class="tip-box">
+            <h3 class="tip-title">打赏</h3>
+            <p>您喜欢 <span id="tip-content-title"></span> 吗？</p>
+            <p>请输入打赏金额：</p>
+            <input type="number" class="tip-input" id="tip-amount" placeholder="¥">
+            <div class="tip-buttons">
+                <button class="tip-btn tip-btn-cancel" id="tip-cancel">取消</button>
+                <button class="tip-btn tip-btn-confirm" id="tip-confirm">确定</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 模拟数据
+        const contentData = [
+            {
+                id: 1,
+                title: 'Paskal',
+                description: '马来西亚海军特种部队PASKAL的故事，讲述了精英海军陆战队员执行危险任务的经历。',
+                poster: 'https://via.placeholder.com/300x180.png?text=Paskal+Poster',
+                type: '电影',
+                country: '马来西亚',
+                releaseDate: '2018-09-27',
+                cast: 'Hairul Azreen, Ammar Alfian, Henley Hii',
+                gallery: [
+                    'https://via.placeholder.com/120x80.png?text=Paskal+Gallery+1',
+                    'https://via.placeholder.com/120x80.png?text=Paskal+Gallery+2',
+                    'https://via.placeholder.com/120x80.png?text=Paskal+Gallery+3'
+                ]
+            },
+            {
+                id: 2,
+                title: 'The Ghost Bride',
+                description: '19世纪末的马六甲，一个年轻女子被迫嫁给一个已故富家子弟的鬼魂，陷入一场超自然谜团。',
+                poster: 'https://via.placeholder.com/300x180.png?text=The+Ghost+Bride+Poster',
+                type: '电视剧',
+                country: '马来西亚',
+                releaseDate: '2020-01-23',
+                cast: '黄姵嘉, 吴慷仁, 林路迪',
+                gallery: [
+                    'https://via.placeholder.com/120x80.png?text=The+Ghost+Bride+Gallery+1',
+                    'https://via.placeholder.com/120x80.png?text=The+Ghost+Bride+Gallery+2',
+                    'https://via.placeholder.com/120x80.png?text=The+Ghost+Bride+Gallery+3'
+                ]
+            },
+            {
+                id: 3,
+                title: '寄生虫',
+                description: '一个贫穷家庭的成员逐渐渗透到一个富裕家庭的生活中，直到一场意外揭开了令人不安的真相。',
+                poster: 'https://via.placeholder.com/300x180.png?text=Parasite+Poster',
+                type: '电影',
+                country: '韩国',
+                releaseDate: '2019-05-30',
+                cast: '宋康昊, 李善均, 赵汝贞',
+                gallery: [
+                    'https://via.placeholder.com/120x80.png?text=Parasite+Gallery+1',
+                    'https://via.placeholder.com/120x80.png?text=Parasite+Gallery+2',
+                    'https://via.placeholder.com/120x80.png?text=Parasite+Gallery+3'
+                ]
+            },
+            {
+                id: 4,
+                title: '鱿鱼游戏',
+                description: '数百名陷入财务困境的玩家接受神秘邀请，参加一系列儿童游戏，却发现赌注远超想象。',
+                poster: 'https://via.placeholder.com/300x180.png?text=Squid+Game+Poster',
+                type: '电视剧',
+                country: '韩国',
+                releaseDate: '2021-09-17',
+                cast: '李政宰, 朴海秀, 魏嘏隽',
+                gallery: [
+                    'https://via.placeholder.com/120x80.png?text=Squid+Game+Gallery+1',
+                    'https://via.placeholder.com/120x80.png?text=Squid+Game+Gallery+2',
+                    'https://via.placeholder.com/120x80.png?text=Squid+Game+Gallery+3'
+                ]
+            },
+            {
+                id: 5,
+                title: '极限挑战',
+                description: '中国大型户外真人秀节目，六位固定成员需要完成各种有趣且富有挑战性的任务。',
+                poster: 'https://via.placeholder.com/300x180.png?text=Go+Fighting+Poster',
+                type: '综艺',
+                country: '中国',
+                releaseDate: '2015-06-14',
+                cast: '黄渤, 孙红雷, 黄磊, 罗志祥, 王迅, 张艺兴',
+                gallery: [
+                    'https://via.placeholder.com/120x80.png?text=Go+Fighting+Gallery+1',
+                    'https://via.placeholder.com/120x80.png?text=Go+Fighting+Gallery+2',
+                    'https://via.placeholder.com/120x80.png?text=Go+Fighting+Gallery+3'
+                ]
+            },
+            {
+                id: 6,
+                title: '复仇者联盟',
+                description: '地球最强英雄联手对抗外星威胁，保护地球免受邪恶诡计的侵害。',
+                poster: 'https://via.placeholder.com/300x180.png?text=The+Avengers+Poster',
+                type: '电影',
+                country: '美国',
+                releaseDate: '2012-05-04',
+                cast: 'Robert Downey Jr., Chris Evans, Scarlett Johansson',
+                gallery: [
+                    'https://via.placeholder.com/120x80.png?text=The+Avengers+Gallery+1',
+                    'https://via.placeholder.com/120x80.png?text=The+Avengers+Gallery+2',
+                    'https://via.placeholder.com/120x80.png?text=The+Avengers+Gallery+3'
+                ]
+            }
+        ];
+        
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            renderContentGrid();
+            setupEventListeners();
+        });
+        
+        // 渲染首页内容网格
+        function renderContentGrid() {
+            const contentGrid = document.getElementById('content-grid');
+            contentGrid.innerHTML = '';
+            
+            contentData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'content-card';
+                card.dataset.id = item.id;
+                
+                card.innerHTML = `
+                    <img src="${item.poster}" alt="${item.title}" class="card-img">
+                    <div class="card-info">
+                        <h3 class="card-title">${item.title}</h3>
+                        <p class="card-desc">${item.description}</p>
+                        <div class="card-tags">
+                            <span class="tag type">${item.type}</span>
+                            <span class="tag country">${item.country}</span>
+                        </div>
+                    </div>
+                `;
+                
+                contentGrid.appendChild(card);
+            });
+        }
+        
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 点击内容卡片，显示详情页
+            document.querySelectorAll('.content-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const id = parseInt(this.dataset.id);
+                    showContentDetail(id);
+                });
+            });
+            
+            // 关闭详情页
+            document.getElementById('close-detail').addEventListener('click', function() {
+                document.getElementById('detail-container').style.display = 'none';
+            });
+            
+            // 点击好评按钮
+            document.getElementById('btn-like').addEventListener('click', function() {
+                const detailTitle = document.getElementById('detail-title').textContent;
+                document.getElementById('tip-content-title').textContent = detailTitle;
+                document.getElementById('tip-container').style.display = 'flex';
+            });
+            
+            // 点击差评按钮
+            document.getElementById('btn-dislike').addEventListener('click', function() {
+                alert('感谢您的评价！');
+            });
+            
+            // 打赏取消按钮
+            document.getElementById('tip-cancel').addEventListener('click', function() {
+                document.getElementById('tip-container').style.display = 'none';
+            });
+            
+            // 打赏确认按钮
+            document.getElementById('tip-confirm').addEventListener('click', function() {
+                const amount = document.getElementById('tip-amount').value;
+                if (amount && amount > 0) {
+                    alert(`感谢您的打赏：¥${amount}！`);
+                    document.getElementById('tip-container').style.display = 'none';
+                } else {
+                    alert('请输入有效的打赏金额！');
+                }
+            });
+        }
+        
+        // 显示内容详情
+        function showContentDetail(id) {
+            const item = contentData.find(content => content.id === id);
+            if (!item) return;
+            
+            document.getElementById('detail-poster').src = item.poster;
+            document.getElementById('detail-poster').alt = item.title;
+            document.getElementById('detail-title').textContent = item.title;
+            
+            const detailMeta = document.getElementById('detail-meta');
+            detailMeta.innerHTML = `
+                <span class="tag type">${item.type}</span>
+                <span class="tag country">${item.country}</span>
+                <span class="tag">上映日期: ${item.releaseDate}</span>
+            `;
+            
+            document.getElementById('detail-desc').textContent = item.description;
+            document.getElementById('detail-cast').textContent = item.cast;
+            
+            const gallery = document.getElementById('detail-gallery');
+            gallery.innerHTML = '';
+            
+            item.gallery.forEach(imgSrc => {
+                const img = document.createElement('img');
+                img.className = 'gallery-img';
+                img.src = imgSrc;
+                img.alt = item.title;
+                gallery.appendChild(img);
+            });
+            
+            document.getElementById('detail-container').style.display = 'block';
+        }
+    </script>
